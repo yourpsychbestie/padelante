@@ -1890,9 +1890,47 @@
         <div class="filter-chip" onclick="filterDirNew(this,'infancia')">🧒 Infancia</div>
         <div class="filter-chip" onclick="filterDirNew(this,'asilo')">📄 Asilo</div>
       </div>
+      
+      <!-- Botón para ver mapa -->
+      <button onclick="goTo('mapa'); initMap();" style="width:100%;background:linear-gradient(135deg,#1D9E75,#0F6E56);border:none;border-radius:var(--radius);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#fff;font-family:var(--font-sans);">
+        <div style="font-size:24px;">🗺️</div>
+        <div style="text-align:left;">
+          <div style="font-size:15px;font-weight:500;">Ver en mapa</div>
+          <div style="font-size:12px;opacity:.8;">Encuentra albergues cerca de tu ubicación</div>
+        </div>
+        <div style="margin-left:auto;font-size:18px;">→</div>
+      </button>
+      
       <div id="dir-new-list"></div>
 
       <div style="height:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SCREEN: MAPA DE ALBERGUES -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="screen" id="screen-mapa">
+    <div style="background:linear-gradient(150deg,#0D2030,#185FA5);padding:52px 20px 20px;position:relative;">
+      <button style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;" onclick="goBack()">←</button>
+      <div style="font-family:var(--font-serif);font-size:28px;color:#fff;margin-bottom:4px;">Mapa de apoyo</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:16px;">Encuentra albergues cerca de ti</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="filterMapByCountry('todos')" class="map-filter-btn active" data-filter="todos" style="background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:12px;cursor:pointer;">Todos</button>
+        <button onclick="filterMapByCountry('mexico')" class="map-filter-btn" data-filter="mexico" style="background:rgba(255,255,255,.1);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:12px;cursor:pointer;">🇲🇽 México</button>
+        <button onclick="filterMapByCountry('eua')" class="map-filter-btn" data-filter="eua" style="background:rgba(255,255,255,.1);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:12px;cursor:pointer;">🇺🇸 EUA</button>
+        <button onclick="centerOnUser()" style="background:var(--teal);border:none;border-radius:20px;padding:6px 14px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;">📍 Mi ubicación</button>
+      </div>
+    </div>
+    <div style="flex:1;position:relative;min-height:400px;">
+      <div id="shelter-map" style="width:100%;height:100%;min-height:400px;background:var(--bg2);"></div>
+      <div id="map-loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+        <div style="font-size:40px;margin-bottom:8px;">🗺️</div>
+        <div style="font-size:14px;color:var(--text2);">Cargando mapa...</div>
+      </div>
+    </div>
+    <div style="background:var(--surface);padding:16px 18px;border-top:1px solid var(--bg3);max-height:200px;overflow-y:auto;" id="map-shelter-list">
+      <div style="font-size:12px;color:var(--text3);text-align:center;padding:20px;">Selecciona un marcador en el mapa para ver detalles</div>
     </div>
   </div>
 
@@ -2351,7 +2389,7 @@
   // ─── NAVIGATION ───
   let currentScreen = 'splash';
   let history = [];
-  const screensWithNav = ['home-migrant','directorio','ancla','home-consular','quiz-selector','quiz-results','derechos','crisis-lines','frases','retos','carta','cuerpo','alerta-genero','pappo'];
+  const screensWithNav = ['home-migrant','directorio','ancla','home-consular','quiz-selector','quiz-results','derechos','crisis-lines','frases','retos','carta','cuerpo','alerta-genero','pappo','mapa'];
   // sesiones y player NO tienen nav inferior — se navega con botón volver
 
   function goTo(id) {
@@ -5051,16 +5089,16 @@ Después de ${PAPPO_MAX} mensajes, invita a explorar los módulos directamente.$
   // ALBERGUES CON RESEÑAS
   // ═══════════════════════════════════════════
   const sheltersData = [
-    { id:'cafemin', nombre:'CAFEMIN', pais:'mexico', ciudad:'Ciudad de México', tipo:'Mujeres y familias', desc:'Casa de Acogida y Aprende para Mujeres Migrantes. Atención psicológica, orientación legal y albergue.', tel:'+52 55 5529-4905', servicios:['Albergue','Atención psicológica','Orientación legal','Para mujeres'] },
-    { id:'scalabrini', nombre:'Casa del Migrante Scalabrini', pais:'mexico', ciudad:'Ciudad de México', tipo:'General', desc:'Albergue que ofrece alojamiento, alimentación, atención médica y apoyo espiritual a migrantes en tránsito.', tel:'+52 55 5529-7104', servicios:['Albergue','Comida','Atención médica','Apoyo espiritual'] },
-    { id:'jesuita', nombre:'Servicio Jesuita a Refugiados', pais:'mexico', ciudad:'Ciudad de México / Tapachula', tipo:'Legal y psicosocial', desc:'Acompañamiento jurídico y psicosocial en solicitudes ante COMAR. CDMX: +52 55 5527 5423. Tapachula: +52 962 625 6961.', tel:'+52 55 5527 5423', servicios:['Asilo','Legal','Psicosocial'] },
-    { id:'calderonas', nombre:'Las Calderonas (PAMAR)', pais:'mexico', ciudad:'Morelia, Michoacán', tipo:'Infancia', desc:'Red comunitaria de apoyo para niñas, niños y adolescentes migrantes. Atención psicosocial y educativa.', tel:'+52 443 688 2100', servicios:['Infancia','Atención psicosocial','Educación'] },
-    { id:'ktt', nombre:'Keep Tucson Together', pais:'eua', ciudad:'Tucson, Arizona', tipo:'Legal', desc:'Asilo, DACA, ciudadanía, permiso de trabajo. Clínica legal gratuita para familias.', tel:'+1 (520) 623-4084', servicios:['Asilo','DACA','Legal','Documentación'] },
-    { id:'refugee-one', nombre:'Refugee One', pais:'eua', ciudad:'Chicago, Illinois', tipo:'Servicios integrales', desc:'Red completa para refugiados: vivienda, empleo, servicios legales, salud mental.', tel:'+1 (773) 989-5647', servicios:['Vivienda','Empleo','Legal','Salud mental'] },
-    { id:'caritas', nombre:'Cáritas', pais:'eua', ciudad:'EUA / México', tipo:'Humanitario', desc:'Red internacional de atención humanitaria. Busca tu oficina local en caritas.org', tel:'', servicios:['Albergue','Emergencias','Humanitario'] },
-    { id:'sisters', nombre:'Sister\'s House (Belrefugees)', pais:'europa', ciudad:'Bruselas, Bélgica', tipo:'Mujeres en tránsito', desc:'Alojamiento para mujeres migrantes. 70 plazas. Email: info@slsh.be', tel:'', servicios:['Mujeres','Albergue','Tránsito'] },
-    { id:'hope', nombre:'Hope Border Institute', pais:'eua', ciudad:'El Paso, Texas', tipo:'Derechos y asilo', desc:'Investigación y acompañamiento en derechos en la frontera. Apoyo a líderes de fe.', tel:'+1 (915) 872-8400', servicios:['Asilo','Derechos','Información'] },
-    { id:'sembrando', nombre:'Sembrando Hoy, Cosechando Mañana', pais:'mexico', ciudad:'Ciudad Juárez, Chihuahua', tipo:'Sobrevivientes', desc:'Apoyo a personas sobrevivientes de trata y violencia. Reintegración social.', tel:'', servicios:['Trata','Reintegración','Acompañamiento'] }
+    { id:'cafemin', nombre:'CAFEMIN', pais:'mexico', ciudad:'Ciudad de México', tipo:'Mujeres y familias', desc:'Casa de Acogida y Aprende para Mujeres Migrantes. Atención psicológica, orientación legal y albergue.', tel:'+52 55 5529-4905', servicios:['Albergue','Atención psicológica','Orientación legal','Para mujeres'], lat:19.4326, lng:-99.1332, direccion:'Calle Dr. Lucio 108, Doctores, Cuauhtémoc, 06720 Ciudad de México' },
+    { id:'scalabrini', nombre:'Casa del Migrante Scalabrini', pais:'mexico', ciudad:'Ciudad de México', tipo:'General', desc:'Albergue que ofrece alojamiento, alimentación, atención médica y apoyo espiritual a migrantes en tránsito.', tel:'+52 55 5529-7104', servicios:['Albergue','Comida','Atención médica','Apoyo espiritual'], lat:19.4434, lng:-99.1453, direccion:'Calle de Hidalgo 142, Guerrero, Cuauhtémoc, 06300 Ciudad de México' },
+    { id:'jesuita', nombre:'Servicio Jesuita a Refugiados', pais:'mexico', ciudad:'Ciudad de México / Tapachula', tipo:'Legal y psicosocial', desc:'Acompañamiento jurídico y psicosocial en solicitudes ante COMAR. CDMX: +52 55 5527 5423. Tapachula: +52 962 625 6961.', tel:'+52 55 5527 5423', servicios:['Asilo','Legal','Psicosocial'], lat:19.4194, lng:-99.1611, direccion:'Orizaba 39Bis, Roma Norte, Cuauhtémoc, 06700 Ciudad de México' },
+    { id:'calderonas', nombre:'Las Calderonas (PAMAR)', pais:'mexico', ciudad:'Morelia, Michoacán', tipo:'Infancia', desc:'Red comunitaria de apoyo para niñas, niños y adolescentes migrantes. Atención psicosocial y educativa.', tel:'+52 443 688 2100', servicios:['Infancia','Atención psicosocial','Educación'], lat:19.7008, lng:-101.1844, direccion:'Morelia, Michoacán (consultar ubicación específica)' },
+    { id:'ktt', nombre:'Keep Tucson Together', pais:'eua', ciudad:'Tucson, Arizona', tipo:'Legal', desc:'Asilo, DACA, ciudadanía, permiso de trabajo. Clínica legal gratuita para familias.', tel:'+1 (520) 623-4084', servicios:['Asilo','DACA','Legal','Documentación'], lat:32.2159, lng:-110.9703, direccion:'730 S. Osborne Ave, Tucson, AZ 85701' },
+    { id:'refugee-one', nombre:'Refugee One', pais:'eua', ciudad:'Chicago, Illinois', tipo:'Servicios integrales', desc:'Red completa para refugiados: vivienda, empleo, servicios legales, salud mental.', tel:'+1 (773) 989-5647', servicios:['Vivienda','Empleo','Legal','Salud mental'], lat:41.9908, lng:-87.6947, direccion:'6008 N. California Ave, Chicago, IL 60659' },
+    { id:'caritas', nombre:'Cáritas', pais:'eua', ciudad:'EUA / México', tipo:'Humanitario', desc:'Red internacional de atención humanitaria. Busca tu oficina local en caritas.org', tel:'', servicios:['Albergue','Emergencias','Humanitario'], lat:null, lng:null, direccion:'Múltiples ubicaciones - consultar caritas.org' },
+    { id:'sisters', nombre:'Sister\'s House (Belrefugees)', pais:'europa', ciudad:'Bruselas, Bélgica', tipo:'Mujeres en tránsito', desc:'Alojamiento para mujeres migrantes. 70 plazas. Email: info@slsh.be', tel:'', servicios:['Mujeres','Albergue','Tránsito'], lat:50.8125, lng:4.3926, direccion:'Boulevard du Triomphe, Bruselas (cerca de ULB)' },
+    { id:'hope', nombre:'Hope Border Institute', pais:'eua', ciudad:'El Paso, Texas', tipo:'Derechos y asilo', desc:'Investigación y acompañamiento en derechos en la frontera. Apoyo a líderes de fe.', tel:'+1 (915) 872-8400', servicios:['Asilo','Derechos','Información'], lat:31.7619, lng:-106.4850, direccion:'499 St. Matthews Street, El Paso, TX 79907' },
+    { id:'sembrando', nombre:'Sembrando Hoy, Cosechando Mañana', pais:'mexico', ciudad:'Ciudad Juárez, Chihuahua', tipo:'Sobrevivientes', desc:'Apoyo a personas sobrevivientes de trata y violencia. Reintegración social.', tel:'', servicios:['Trata','Reintegración','Acompañamiento'], lat:31.6904, lng:-106.4245, direccion:'Ciudad Juárez, Chihuahua' }
   ];
 
   let shelterReviews = JSON.parse(localStorage.getItem('raiz_shelter_reviews') || '{}');
@@ -5173,6 +5211,179 @@ Después de ${PAPPO_MAX} mensajes, invita a explorar los módulos directamente.$
     try { localStorage.setItem('raiz_shelter_reviews', JSON.stringify(shelterReviews)); } catch(e) {}
     shelterRating[id] = 0;
     filterShelters(null, 'todos');
+  }
+
+  // ═══════════════════════════════════════════
+  // MAPA INTERACTIVO DE ALBERGUES
+  // ═══════════════════════════════════════════
+  let map = null;
+  let mapMarkers = [];
+  let userLocation = null;
+  let currentMapFilter = 'todos';
+
+  function initMap() {
+    const mapContainer = document.getElementById('shelter-map');
+    const loadingEl = document.getElementById('map-loading');
+    
+    if (!mapContainer) return;
+    
+    // Limpiar mapa anterior si existe
+    if (map) {
+      map.remove();
+      map = null;
+    }
+    
+    // Cargar Leaflet CSS y JS dinámicamente si no están cargados
+    if (!window.L) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+      
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => createMap();
+      document.head.appendChild(script);
+    } else {
+      createMap();
+    }
+  }
+
+  function createMap() {
+    const mapContainer = document.getElementById('shelter-map');
+    const loadingEl = document.getElementById('map-loading');
+    
+    // Centro por defecto (México)
+    const defaultCenter = [19.4326, -99.1332];
+    const defaultZoom = 5;
+    
+    map = L.map('shelter-map').setView(defaultCenter, defaultZoom);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+    
+    // Agregar marcadores de albergues
+    addShelterMarkers();
+    
+    // Ocultar loading
+    if (loadingEl) loadingEl.style.display = 'none';
+    
+    // Intentar obtener ubicación del usuario
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userLocation = [position.coords.latitude, position.coords.longitude];
+          // No centramos automáticamente para no sobrescribir la vista de albergues
+        },
+        (error) => {
+          console.log('No se pudo obtener ubicación:', error);
+        }
+      );
+    }
+  }
+
+  function addShelterMarkers() {
+    if (!map) return;
+    
+    // Limpiar marcadores anteriores
+    mapMarkers.forEach(marker => map.removeLayer(marker));
+    mapMarkers = [];
+    
+    const sheltersToShow = currentMapFilter === 'todos' 
+      ? sheltersData 
+      : sheltersData.filter(s => s.pais === currentMapFilter);
+    
+    sheltersToShow.forEach(shelter => {
+      if (!shelter.lat || !shelter.lng) return;
+      
+      const marker = L.marker([shelter.lat, shelter.lng]).addTo(map);
+      
+      const popupContent = `
+        <div style="font-family:system-ui,sans-serif;padding:8px;min-width:200px;">
+          <div style="font-weight:600;font-size:15px;margin-bottom:4px;">${shelter.nombre}</div>
+          <div style="font-size:12px;color:#666;margin-bottom:8px;">${shelter.ciudad} · ${shelter.tipo}</div>
+          <div style="font-size:13px;line-height:1.5;margin-bottom:10px;">${shelter.desc}</div>
+          ${shelter.tel ? `<a href="tel:${shelter.tel.replace(/\D/g,'')}" style="display:inline-block;background:#1D9E75;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px;">📞 Llamar</a>` : ''}
+        </div>
+      `;
+      
+      marker.bindPopup(popupContent);
+      marker.on('click', () => showShelterInList(shelter));
+      mapMarkers.push(marker);
+    });
+    
+    // Ajustar vista para mostrar todos los marcadores
+    if (mapMarkers.length > 0) {
+      const group = new L.featureGroup(mapMarkers);
+      map.fitBounds(group.getBounds().pad(0.1));
+    }
+  }
+
+  function showShelterInList(shelter) {
+    const listEl = document.getElementById('map-shelter-list');
+    if (!listEl) return;
+    
+    listEl.innerHTML = `
+      <div style="background:var(--surface);border-radius:var(--radius);padding:16px;border:1px solid rgba(28,26,22,.05);box-shadow:var(--shadow);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:16px;font-weight:500;color:var(--text);">${shelter.nombre}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px;">${shelter.ciudad} · ${shelter.tipo}</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;">${shelter.desc}</div>
+        ${shelter.direccion ? `<div style="font-size:12px;color:var(--text3);margin-bottom:10px;">📍 ${shelter.direccion}</div>` : ''}
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">
+          ${shelter.servicios.map(sv => `<span style="font-size:11px;background:var(--teal-l);color:var(--teal-d);padding:3px 10px;border-radius:20px;">${sv}</span>`).join('')}
+        </div>
+        ${shelter.tel ? `<a href="tel:${shelter.tel.replace(/\D/g,'')}" style="display:block;background:var(--teal);color:#fff;text-decoration:none;padding:12px;border-radius:var(--radius-sm);text-align:center;font-size:14px;font-weight:500;">📞 ${shelter.tel}</a>` : '<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px;background:var(--bg2);border-radius:var(--radius-sm);">Sin teléfono disponible</div>'}
+      </div>
+    `;
+  }
+
+  function filterMapByCountry(country) {
+    currentMapFilter = country;
+    
+    // Actualizar botones
+    document.querySelectorAll('.map-filter-btn').forEach(btn => {
+      btn.style.background = 'rgba(255,255,255,.1)';
+      btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`[data-filter="${country}"]`);
+    if (activeBtn) {
+      activeBtn.style.background = 'rgba(255,255,255,.2)';
+      activeBtn.classList.add('active');
+    }
+    
+    addShelterMarkers();
+  }
+
+  function centerOnUser() {
+    if (!map) return;
+    
+    if (userLocation) {
+      map.setView(userLocation, 13);
+      L.marker(userLocation).addTo(map)
+        .bindPopup('Tu ubicación')
+        .openPopup();
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userLocation = [position.coords.latitude, position.coords.longitude];
+          map.setView(userLocation, 13);
+          L.marker(userLocation).addTo(map)
+            .bindPopup('Tu ubicación')
+            .openPopup();
+        },
+        (error) => {
+          alert('No se pudo obtener tu ubicación. Verifica los permisos de ubicación.');
+        }
+      );
+    } else {
+      alert('Tu dispositivo no soporta geolocalización.');
+    }
   }
 
   // ═══════════════════════════════════════════
